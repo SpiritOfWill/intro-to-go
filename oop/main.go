@@ -15,7 +15,7 @@ import "fmt"
 type Animal struct{}
 
 func (*Animal) Walk() string {
-	return "🚶🏻‍♂"
+	return "🚶🏻‍♂" // Unicode support
 }
 
 func (*Animal) Die() string {
