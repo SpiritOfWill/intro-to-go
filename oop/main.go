@@ -37,12 +37,12 @@ func (*Dog) Bark() string {
 type Cat struct {
 	*Animal
 
-	lives uint
+	lives int
 }
 
 func NewCat() *Cat {
 	return &Cat{
-		lives: 9,
+		lives: 2, // it's old cat, there is left only 2 lives from 9
 	}
 }
 
@@ -54,11 +54,11 @@ func (*Cat) Meow() string {
 func (c *Cat) Die() string {
 	c.lives--
 
-	if c.lives == 0 {
-		return "💀"
+	if c.lives <= 0 {
+		return c.Animal.Die()
 	}
 
-	return fmt.Sprintf("left %d lives", c.lives)
+	return fmt.Sprintf("left %d❤", c.lives)
 }
 
 // Walker - just interface(not related to inheritance, added for usability)
