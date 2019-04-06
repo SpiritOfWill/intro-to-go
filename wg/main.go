@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 )
 
 const (
@@ -108,7 +107,7 @@ func r(length int) [][]byte {
 	res := make([][]byte, 0, length)
 
 	for i := 1; i <= length; i++ {
-		b := make([]byte, 256)
+		b := make([]byte, 2*1024*1024) // 2 Mb
 		rand.Read(b)
 		res = append(res, b)
 	}
@@ -119,7 +118,7 @@ func r(length int) [][]byte {
 }
 
 func md5sum(data []byte) string {
-	time.Sleep(100 * time.Millisecond)
+	// time.Sleep(100 * time.Millisecond)
 
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
