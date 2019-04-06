@@ -13,31 +13,20 @@ const (
 	TotalWorkers = 5
 )
 
-func Work(id int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- string) {
-	log.Printf("worker #%d: started\n", id)
-
-	for data := range reqChan {
-		s := md5sum(data)
-
-		log.Printf("worker #%d: sending: %s\n", id, s)
-
-		respChan <- s
-	}
-
-	log.Printf("worker #%d: done\n", id)
-	wg.Done()
-}
-
 func main() {
 	requests := r(Count)
 
+	doAsync(requests)
+}
+
+func doAsync(requests [][]byte) {
 	var wg sync.WaitGroup
 
 	reqChan := make(chan []byte, TotalWorkers)
 	respChan := make(chan string, TotalWorkers)
 	doneChan := make(chan struct{}, 1)
 
-	go func() { // size of reqChan is 5
+	go func() { // size of reqChan is only 5
 		for _, b := range requests {
 			reqChan <- b
 		}
@@ -55,6 +44,21 @@ func main() {
 	go getResults(respChan, doneChan)
 
 	<-doneChan // blocking
+}
+
+func Work(id int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- string) {
+	log.Printf("worker #%d: started\n", id)
+
+	for data := range reqChan {
+		s := md5sum(data)
+
+		log.Printf("worker #%d: sending: %s\n", id, s)
+
+		respChan <- s
+	}
+
+	log.Printf("worker #%d: done\n", id)
+	wg.Done()
 }
 
 func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
@@ -77,10 +81,10 @@ func getResults(respChan <-chan string, doneChan chan<- struct{}) {
 
 		log.Println("getResults: got from workers:", s)
 
-		res = append(res, s) // or write to DB...
+		res = append(res, s)
 
 		if len(res) == batchSize {
-			log.Println("results:", res)
+			log.Println("results:", res) // or write to DB...
 
 			res = make([]string, 0, batchSize)
 		}
@@ -89,6 +93,8 @@ func getResults(respChan <-chan string, doneChan chan<- struct{}) {
 	if len(res) != 0 {
 		log.Println("final results:", res)
 	}
+
+	// all results are saved
 
 	close(doneChan)
 }
