@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Count        = 100
+	Count        = 50
 	TotalWorkers = 5
 )
 
@@ -33,6 +33,7 @@ func main() {
 
 	reqChan := make(chan []byte, TotalWorkers)
 	respChan := make(chan string, TotalWorkers)
+	doneChan := make(chan struct{}, 1)
 
 	requests := r()
 
@@ -51,7 +52,9 @@ func main() {
 
 	go resChanCloser(&wg, respChan)
 
-	log.Println("results:", getResults(respChan))
+	go getResults(respChan, doneChan)
+
+	<-doneChan // blocking
 }
 
 func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
@@ -62,8 +65,9 @@ func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
 	close(respChan) // sending a "signal" to func getResults(), that there will be no more messages.
 }
 
-func getResults(respChan <-chan string) []string {
-	res := make([]string, 0, Count)
+func getResults(respChan <-chan string, doneChan chan<- struct{}) {
+	batchSize := Count
+	res := make([]string, 0, batchSize)
 
 	for {
 		s, ok := <-respChan
@@ -74,9 +78,19 @@ func getResults(respChan <-chan string) []string {
 		log.Println("getResults: got from workers:", s)
 
 		res = append(res, s) // or write to DB...
+
+		if len(res) == batchSize {
+			log.Println("results:", res)
+
+			res = make([]string, 0, batchSize)
+		}
 	}
 
-	return res
+	if len(res) != 0 {
+		log.Println("final results:", res)
+	}
+
+	close(doneChan)
 }
 
 func r() [][]byte {
