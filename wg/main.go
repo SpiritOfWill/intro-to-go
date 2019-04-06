@@ -19,7 +19,7 @@ func main() {
 
 	doAsync(requests)
 
-	doSync(requests)
+	// doSync(requests)
 }
 
 func doAsync(requests [][]byte) {
