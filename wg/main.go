@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"fmt"
+	"log"
 	"sync"
 )
 
@@ -13,16 +14,17 @@ const (
 )
 
 func Work(i int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- string) {
-	fmt.Printf("spainning worker #%d\n", i)
+	log.Printf("spainning worker #%d\n", i)
 
 	for data := range reqChan {
 		s := fmt.Sprintf("%x", md5.Sum(data))
 
-		fmt.Printf("worker #%d: sending: %s\n", i, s)
+		log.Printf("worker #%d: sending: %s\n", i, s)
 
 		respChan <- s
 	}
 
+	log.Printf("worker #%d: done\n", i)
 	wg.Done()
 }
 
@@ -31,12 +33,6 @@ func main() {
 
 	reqChan := make(chan []byte, TotalWorkers)
 	respChan := make(chan string, Count)
-
-	wg.Add(TotalWorkers)
-	for i := 1; i <= TotalWorkers; i++ {
-		// starting workers
-		go Work(i, &wg, reqChan, respChan)
-	}
 
 	requests := r()
 
@@ -47,9 +43,15 @@ func main() {
 		close(reqChan)
 	}()
 
+	wg.Add(TotalWorkers)
+	for i := 1; i <= TotalWorkers; i++ {
+		// starting workers
+		go Work(i, &wg, reqChan, respChan)
+	}
+
 	go resChanCloser(&wg, respChan)
 
-	fmt.Println(getResults(respChan))
+	log.Println("results:", getResults(respChan))
 }
 
 func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
@@ -69,7 +71,7 @@ func getResults(respChan <-chan string) []string {
 			break
 		}
 
-		fmt.Println("got from workers:", s)
+		log.Println("getResults: got from workers:", s)
 
 		res = append(res, s) // or write to DB...
 	}
@@ -85,6 +87,8 @@ func r() [][]byte {
 		rand.Read(b)
 		res = append(res, b)
 	}
+
+	log.Println("generated requests")
 
 	return res
 }
