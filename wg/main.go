@@ -17,7 +17,7 @@ func Work(id int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- str
 	log.Printf("worker #%d: started\n", id)
 
 	for data := range reqChan {
-		s := fmt.Sprintf("%x", md5.Sum(data))
+		s := md5sum(data)
 
 		log.Printf("worker #%d: sending: %s\n", id, s)
 
@@ -29,13 +29,13 @@ func Work(id int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- str
 }
 
 func main() {
+	requests := r(Count)
+
 	var wg sync.WaitGroup
 
 	reqChan := make(chan []byte, TotalWorkers)
 	respChan := make(chan string, TotalWorkers)
 	doneChan := make(chan struct{}, 1)
-
-	requests := r()
 
 	go func() { // size of reqChan is 5
 		for _, b := range requests {
@@ -93,10 +93,10 @@ func getResults(respChan <-chan string, doneChan chan<- struct{}) {
 	close(doneChan)
 }
 
-func r() [][]byte {
-	res := make([][]byte, 0, Count)
+func r(length int) [][]byte {
+	res := make([][]byte, 0, length)
 
-	for i := 1; i <= Count; i++ {
+	for i := 1; i <= length; i++ {
 		b := make([]byte, 256)
 		rand.Read(b)
 		res = append(res, b)
@@ -105,4 +105,8 @@ func r() [][]byte {
 	log.Println("generated requests")
 
 	return res
+}
+
+func md5sum(data []byte) string {
+	return fmt.Sprintf("%x", md5.Sum(data))
 }
