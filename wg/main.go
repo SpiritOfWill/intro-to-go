@@ -135,7 +135,7 @@ func doSync(requests [][]byte) {
 		log.Printf("saving: %s\n", s)
 
 		res = append(res, s)
-		log.Printf("saving: %s\n", s)
+		log.Printf("saved: %s\n", s)
 	}
 
 	log.Println("results:", res)
