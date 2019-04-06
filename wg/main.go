@@ -18,6 +18,8 @@ func main() {
 	requests := r(Count)
 
 	doAsync(requests)
+
+	doSync(requests)
 }
 
 func doAsync(requests [][]byte) {
@@ -28,8 +30,10 @@ func doAsync(requests [][]byte) {
 	doneChan := make(chan struct{}, 1)
 
 	go func() { // size of reqChan is only 5
-		for _, b := range requests {
-			reqChan <- b
+		for i, request := range requests {
+			log.Printf("sending request #%d", i)
+
+			reqChan <- request
 		}
 		close(reqChan)
 	}()
@@ -118,4 +122,21 @@ func md5sum(data []byte) string {
 	time.Sleep(100 * time.Millisecond)
 
 	return fmt.Sprintf("%x", md5.Sum(data))
+}
+
+func doSync(requests [][]byte) {
+	res := make([]string, 0, Count)
+
+	for i, request := range requests {
+		log.Printf("sending request #%d", i)
+
+		s := md5sum(request)
+
+		log.Printf("saving: %s\n", s)
+
+		res = append(res, s)
+		log.Printf("saving: %s\n", s)
+	}
+
+	log.Println("results:", res)
 }
