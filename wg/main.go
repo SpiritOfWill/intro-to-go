@@ -32,7 +32,6 @@ func doAsync(requests [][]byte) {
 	go func() { // size of reqChan is only 5
 		for i, request := range requests {
 			log.Printf("sending request #%d", i)
-			_ = i
 
 			reqChan <- request
 		}
@@ -130,7 +129,6 @@ func doSync(requests [][]byte) {
 
 	for i, request := range requests {
 		log.Printf("sending request #%d\n", i)
-		_ = i
 
 		s := md5sum(request)
 
