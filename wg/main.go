@@ -37,7 +37,7 @@ func main() {
 
 	requests := r()
 
-	go func() {
+	go func() { // size of reqChan is 5
 		for _, b := range requests {
 			reqChan <- b
 		}
