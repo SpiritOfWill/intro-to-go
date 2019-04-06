@@ -128,7 +128,7 @@ func doSync(requests [][]byte) {
 	res := make([]string, 0, Count)
 
 	for i, request := range requests {
-		log.Printf("sending request #%d", i)
+		log.Printf("sending request #%d\n", i)
 
 		s := md5sum(request)
 
