@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 )
@@ -31,7 +30,8 @@ func doAsync(requests [][]byte) {
 
 	go func() { // size of reqChan is only 5
 		for i, request := range requests {
-			log.Printf("sending request #%d", i)
+			// log.Printf("sending request #%d", i)
+			_ = i
 
 			reqChan <- request
 		}
@@ -52,24 +52,24 @@ func doAsync(requests [][]byte) {
 }
 
 func Work(id int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- string) {
-	log.Printf("worker #%d: started\n", id)
+	// log.Printf("worker #%d: started\n", id)
 
 	for data := range reqChan {
 		s := md5sum(data)
 
-		log.Printf("worker #%d: sending: %s\n", id, s)
+		// log.Printf("worker #%d: sending: %s\n", id, s)
 
 		respChan <- s
 	}
 
-	log.Printf("worker #%d: done\n", id)
+	// log.Printf("worker #%d: done\n", id)
 	wg.Done()
 }
 
 func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
 	wg.Wait() // goroutine is blocked
 
-	log.Println("all workers are done, closing respChan")
+	// log.Println("all workers are done, closing respChan")
 
 	close(respChan) // sending a "signal" to func getResults(), that there will be no more messages.
 }
@@ -84,19 +84,19 @@ func getResults(respChan <-chan string, doneChan chan<- struct{}) {
 			break
 		}
 
-		log.Println("getResults: got from workers:", s)
+		// log.Println("getResults: got from workers:", s)
 
 		res = append(res, s)
 
 		if len(res) == batchSize {
-			log.Println("results:", res) // or write to DB...
+			// log.Println("results:", res) // or write to DB...
 
 			res = make([]string, 0, batchSize)
 		}
 	}
 
 	if len(res) != 0 {
-		log.Println("final results:", res)
+		// log.Println("final results:", res)
 	}
 
 	// all results are saved
@@ -113,7 +113,7 @@ func r(length int) [][]byte {
 		res = append(res, b)
 	}
 
-	log.Println("generated requests")
+	// log.Println("generated requests")
 
 	return res
 }
@@ -128,15 +128,16 @@ func doSync(requests [][]byte) {
 	res := make([]string, 0, Count)
 
 	for i, request := range requests {
-		log.Printf("sending request #%d\n", i)
+		// log.Printf("sending request #%d\n", i)
+		_ = i
 
 		s := md5sum(request)
 
-		log.Printf("saving: %s\n", s)
+		// log.Printf("saving: %s\n", s)
 
 		res = append(res, s)
-		log.Printf("saving: %s\n", s)
+		// log.Printf("saving: %s\n", s)
 	}
 
-	log.Println("results:", res)
+	// log.Println("results:", res)
 }
