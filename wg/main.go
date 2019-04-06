@@ -8,19 +8,19 @@ import (
 )
 
 const (
-	Count        = 10
+	Count        = 50
 	TotalWorkers = 5
 )
 
-func Work(i int, wg *sync.WaitGroup, inChannel <-chan []byte, resChannel chan<- string) {
+func Work(i int, wg *sync.WaitGroup, reqChan <-chan []byte, respChan chan<- string) {
 	fmt.Printf("spainning worker #%d\n", i)
 
-	for data := range inChannel {
+	for data := range reqChan {
 		s := fmt.Sprintf("%x", md5.Sum(data))
 
 		fmt.Printf("worker #%d: sending: %s\n", i, s)
 
-		resChannel <- s
+		respChan <- s
 	}
 
 	wg.Done()
@@ -29,38 +29,42 @@ func Work(i int, wg *sync.WaitGroup, inChannel <-chan []byte, resChannel chan<- 
 func main() {
 	var wg sync.WaitGroup
 
-	inChannel := make(chan []byte, TotalWorkers)
-	resChannel := make(chan string, Count)
+	reqChan := make(chan []byte, TotalWorkers)
+	respChan := make(chan string, Count)
 
 	wg.Add(TotalWorkers)
 	for i := 1; i <= TotalWorkers; i++ {
 		// starting workers
-		go Work(i, &wg, inChannel, resChannel)
+		go Work(i, &wg, reqChan, respChan)
 	}
 
-	for _, b := range r() {
-		inChannel <- b
-	}
-	close(inChannel)
+	requests := r()
 
-	go resChanCloser(&wg, resChannel) // non blocking
+	go func() {
+		for _, b := range requests {
+			reqChan <- b
+		}
+		close(reqChan)
+	}()
 
-	fmt.Println(getResults(resChannel))
+	go resChanCloser(&wg, respChan)
+
+	fmt.Println(getResults(respChan))
 }
 
-func resChanCloser(wg *sync.WaitGroup, resChannel chan<- string) {
+func resChanCloser(wg *sync.WaitGroup, respChan chan<- string) {
 	wg.Wait() // goroutine is blocked
 
 	// all workers are done
 
-	close(resChannel) // sending a "signal" to func getResults(), that there will be no more messages.
+	close(respChan) // sending a "signal" to func getResults(), that there will be no more messages.
 }
 
-func getResults(resChannel <-chan string) []string {
+func getResults(respChan <-chan string) []string {
 	res := make([]string, 0, Count)
 
 	for {
-		s, ok := <-resChannel
+		s, ok := <-respChan
 		if !ok {
 			break
 		}
