@@ -108,7 +108,12 @@ func r(length int) [][]byte {
 
 	for i := 1; i <= length; i++ {
 		b := make([]byte, 2*1024*1024) // 2 Mb
-		rand.Read(b)
+
+		_, err := rand.Read(b)
+		if err != nil {
+			panic(fmt.Errorf("random failed: %s", err))
+		}
+
 		res = append(res, b)
 	}
 
