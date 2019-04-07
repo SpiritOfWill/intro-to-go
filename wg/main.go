@@ -16,12 +16,12 @@ const (
 func main() {
 	requests := r(Count)
 
-	doAsync(requests)
+	DoAsync(requests)
 
-	// doSync(requests)
+	// DoSync(requests)
 }
 
-func doAsync(requests [][]byte) {
+func DoAsync(requests [][]byte) {
 	var wg sync.WaitGroup
 
 	reqChan := make(chan []byte, TotalWorkers)
@@ -123,7 +123,7 @@ func md5sum(data []byte) string {
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
 
-func doSync(requests [][]byte) {
+func DoSync(requests [][]byte) {
 	res := make([]string, 0, Count)
 
 	for i, request := range requests {

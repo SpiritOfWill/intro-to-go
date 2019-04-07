@@ -12,14 +12,14 @@ func init() {
 	log.SetOutput(ioutil.Discard)
 }
 
-func Benchmark_doAsync(b *testing.B) {
+func BenchmarkDoAsync(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		doAsync(requests)
+		DoAsync(requests)
 	}
 }
 
-func Benchmark_doSync(b *testing.B) {
+func BenchmarkDoSync(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		doSync(requests)
+		DoSync(requests)
 	}
 }
