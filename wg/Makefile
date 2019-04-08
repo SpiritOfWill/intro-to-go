@@ -14,3 +14,7 @@ bench:
 .PHONY: test
 test:
 	go test -count=1 -cover ./...
+
+.PHONY: lint
+lint:
+	golangci-lint run ./...
