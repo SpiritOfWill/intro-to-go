@@ -9,7 +9,7 @@ run:
 
 .PHONY: bench
 bench:
-	go test -bench=. -benchmem
+	go test -bench=. -cpu=1,2,4,8,16 -benchmem
 
 .PHONY: test
 test:
