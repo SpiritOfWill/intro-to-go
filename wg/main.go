@@ -24,8 +24,11 @@ func main() {
 func DoAsync(requests [][]byte) {
 	var wg sync.WaitGroup
 
+	// chan buffer should be tuned to the value when channels are not exhausted
+	//  and workers are not waiting for the input:
 	reqChan := make(chan []byte, TotalWorkers)
 	respChan := make(chan string, TotalWorkers)
+
 	doneChan := make(chan struct{}, 1)
 
 	go func() { // size of reqChan is only 5
