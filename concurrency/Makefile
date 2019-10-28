@@ -1,7 +1,7 @@
 BIN_PATH = build/bin
 
 .PHONY: all
-all: rut
+all: run
 
 .PHONY: run
 run:
