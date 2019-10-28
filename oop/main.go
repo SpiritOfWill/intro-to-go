@@ -12,13 +12,23 @@ https://code.tutsplus.com/tutorials/lets-go-object-oriented-programming-in-golan
 
 import "fmt"
 
-type Animal struct{}
+type Animal struct {
+	lives int
+}
+
+func NewAnimal() *Animal {
+	return &Animal{
+		lives: 0,
+	}
+}
 
 func (*Animal) Walk() string {
 	return "🚶🏻‍♂" // Unicode support
 }
 
-func (*Animal) Die() string {
+func (a *Animal) Die() string {
+	a.lives = 0
+
 	return "💀"
 }
 
@@ -27,7 +37,9 @@ type Dog struct {
 }
 
 func NewDog() *Dog {
-	return &Dog{}
+	return &Dog{
+		Animal: NewAnimal(),
+	}
 }
 
 func (*Dog) Bark() string {
@@ -36,14 +48,21 @@ func (*Dog) Bark() string {
 
 type Cat struct {
 	*Animal
-
-	lives int
 }
 
 func NewCat() *Cat {
+	const lives = 2 // it's an old cat, there are left only 2 lives from 9
+
 	return &Cat{
-		lives: 2, // it's old cat, there is left only 2 lives from 9
+		Animal: &Animal{
+			lives: lives,
+		},
 	}
+
+	// or:
+	// c := &Cat{Animal: NewAnimal()}
+	// c.lives = 2
+	// return c
 }
 
 func (*Cat) Meow() string {
@@ -58,7 +77,7 @@ func (c *Cat) Die() string {
 		return c.Animal.Die()
 	}
 
-	return fmt.Sprintf("left %d❤", c.lives)
+	return fmt.Sprintf("left %d ❤", c.lives)
 }
 
 // Walker - just interface(not related to inheritance, added for usability)
@@ -78,16 +97,17 @@ func main() {
 
 	fmt.Println()
 
-	fmt.Println("🐶 Bark():", dog.Bark())
-	fmt.Println("😼 Meow():", cat.Meow())
+	fmt.Println("🐶.Bark():", dog.Bark())
+	fmt.Println("😼.Meow():", cat.Meow())
 
 	fmt.Println()
 
 	// no way to find out from whom .Die() method was inherited:
-	fmt.Println("🐶 Die():", dog.Die())
-	fmt.Println("😼 Die():", cat.Die())
-	fmt.Println("😼 Die():", cat.Die())
+	fmt.Println("🐶.Die():", dog.Die())
+
+	fmt.Println("😼.Die():", cat.Die())
+	fmt.Println("😼.Die():", cat.Die())
 
 	// but parent method is not overridden and available:
-	fmt.Println("cat.Animal.Die():", cat.Animal.Die())
+	fmt.Println("😼.Animal.Die():", cat.Animal.Die())
 }
