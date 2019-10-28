@@ -18,7 +18,7 @@ type Animal struct {
 
 func NewAnimal() *Animal {
 	return &Animal{
-		lives: 0,
+		lives: 1,
 	}
 }
 
