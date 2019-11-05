@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-var x int // shared(package) variable
+var x = make(map[string]int) // shared(package) variable
 
 func a() {
-	x = 1
+	x["a"] = 1
 }
 
 func b() {
-	x = 2
+	x["b"] = 2
 }
 
 func race() {
