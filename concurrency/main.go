@@ -14,7 +14,7 @@ const (
 )
 
 func main() {
-	requests := r(Count)
+	requests := generateRequest(Count)
 
 	DoAsync(requests)
 
@@ -106,7 +106,7 @@ func getResults(respChan <-chan string, doneChan chan<- struct{}) {
 	close(doneChan)
 }
 
-func r(length int) [][]byte {
+func generateRequest(length int) [][]byte {
 	res := make([][]byte, 0, length)
 
 	for i := 1; i <= length; i++ {
